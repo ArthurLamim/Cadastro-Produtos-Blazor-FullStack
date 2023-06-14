@@ -1,0 +1,51 @@
+﻿@page "/produtos"
+@inject IEstService EstService
+@inject NavigationManager Navigate
+
+
+<PageTitle>Produtos</PageTitle>
+
+<h3>Lista de Produtos</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nome do Produto</th>
+            <th>Valor do Produto</th>
+            <th>Categoria</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var produto in EstService.Produtos)
+        {
+            <tr>
+                <td>@produto.NomeProduto</td>
+                <td>@produto.ValorProduto</td>
+                <td>@produto.Categoria.NomeCategoria</td>
+                <td>
+                    <button class="btn btn-primary" @onclick="(() => ShowProduto(produto.Id))"><i class="oi oi-pencil"></i></button>
+                </td>
+            </tr>
+
+        }
+    </tbody>
+</table>
+
+<button class="btn btn-primary" @onclick="CreateNewProduto">Criar um novo produto</button>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+       await EstService.GetListProdutos();
+    }
+
+    void ShowProduto(int id)
+    {
+        Navigate.NavigateTo($"prod/{id}");
+    }
+     void CreateNewProduto()
+    {
+        Navigate.NavigateTo("prod");
+    }
+}

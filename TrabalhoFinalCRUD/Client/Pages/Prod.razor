@@ -1,0 +1,84 @@
+﻿@page "/prod"
+@page "/prod/{id:int}"
+
+@inject IEstService EstService
+
+@if (Id == null)
+{
+    <PageTitle>Crie um Produto</PageTitle>
+    <h3>Criar um novo produto no estoque</h3>
+}
+else
+{
+    <PageTitle>Editar @produto.NomeProduto</PageTitle>
+    <h3>Edite @produto.NomeProduto </h3>
+}
+
+<EditForm Model="produto" OnSubmit="HandleSubmit">
+    <div>
+        <label for="nomeproduto">Nome do Produto</label>
+        <InputText id="nomeproduto" @bind-Value="produto.NomeProduto" class="form-control"/>
+    </div>
+    <div>
+        <label for="valorproduto">Valor do Produto</label>
+        <InputText id="valorproduto" @bind-Value="produto.ValorProduto" class="form-control" />
+    </div>
+    <div>
+        <label for="categoria">Categoria</label>
+        <InputSelect @bind-Value="produto.CategoriaId" class="form-select">
+            @foreach (var categoria in EstService.Categorias)
+            {
+                <option value="@categoria.Id">@categoria.NomeCategoria</option>
+            }
+        </InputSelect>
+    </div>
+    <br />
+    <button type="submit" class="btn btn-primary">@btnText</button>
+    @if (btnText == "Update produto")
+    {
+        <button class="btn btn-danger" @onclick="DeleteOneProduto">Deletar Produto</button>
+    }
+</EditForm>
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+    Produto produto = new Produto { Categoria = new Categoria() };
+
+
+    string btnText = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        btnText = (Id == null) ? "Save New produto" : "Update produto";
+        await EstService.GetCategorias();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id == null)
+        {
+            //Create a new produto
+        }
+        else
+        {
+
+            produto = await EstService.GetProduto((int) Id);
+            
+        }
+    }
+    async Task HandleSubmit()
+    {
+        if (Id == null)
+        {
+            await EstService.CreateNewProduto(produto);
+        }
+        else
+        {
+             await EstService.AtualizarProduto(produto);
+        }
+    }
+    async Task DeleteOneProduto() {
+        await EstService.DeleteProduto(produto.Id);
+    }
+}
